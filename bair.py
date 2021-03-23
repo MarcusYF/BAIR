@@ -257,6 +257,8 @@ def run_simulation(user_model, delta, N_1_amp=1.0, m=1, verbose=True):
                     F[i] -= 1
                     if F[i] < 0:
                         F.pop(i)
+                        if len(F) == 1:
+                            break;
 
     last_arm = list(F.keys())[0]
 
@@ -362,6 +364,7 @@ if __name__ == '__main__':
     parser.add_argument('--rho', default=1)
     parser.add_argument('--alpha', default=1)
     parser.add_argument('--dp', default=1)
+    parser.add_argument('--m', default=1)
     parser.add_argument('--min_gap', default=0.5)
     parser.add_argument('--num_trials', default=1000)
     parser.add_argument('--T', default=1000)
@@ -376,6 +379,7 @@ if __name__ == '__main__':
     rho = float(args['rho'])
     alpha = float(args['alpha'])
     detpro = float(args['dp'])
+    m = float(args['m'])
     min_gap = float(args['min_gap'])
     num_trials = int(args['num_trials'])
     TT = int(args['T'])
@@ -385,7 +389,7 @@ if __name__ == '__main__':
     N1_amp = float(args['N1_amp'])
     max_ite = int(args['max_ite'])
 
-    m_in_phase2 = 8*detpro*(1-detpro)/((2*detpro-1)**2)*np.log(2*K/delta)
+    m_in_phase2 = m*8*detpro*(1-detpro)/((2*detpro-1)**2)*np.log(2*K/delta)
 
     res_ls = []
     T = []
