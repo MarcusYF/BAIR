@@ -82,9 +82,10 @@ def run_track_and_stop(user_model, delta, MAX_ITE):
     return best_arm == np.argmax(mu), t, sum(sum_reward_per_arm)
 
 class User:
-    def __init__(self, mu, rho, alpha):
+    def __init__(self, mu, rho, alpha, determ_pro):
         self.rho0 = rho
         self.alpha = alpha
+        self.determ_pro = determ_pro
         self.K = len(mu)  # num of arms
         self.mu = mu  # vector of the ground truth mean reward for each arm
         self.sigma = np.ones_like(mu)  # vector of standard deviation for each arm's reward distribution
@@ -126,22 +127,38 @@ class User:
         :return:
         """
         self.global_time += 1
-        gamma = self.trust_func()
-        CB = [np.sqrt(gamma / float(max(1, self.num_acceptance_per_arm[i]))) for i in range(self.K)]
-        UCB_i = self.empirical_mean_per_arm[arm_id] + CB[arm_id]
-        # find the arm with the highest lcb
-        LCB_j = max([self.empirical_mean_per_arm[i] - CB[i] for i in range(self.K)])
-        if LCB_j > UCB_i:
-            return False
-        # no other arm j has LCB larger than UCB of arm i
-        self.num_acceptance_total += 1.0
-        self.accept_ratio = (self.K + self.num_acceptance_total) / (self.K + self.global_time)
-        # observe reward of arm i
-        sampled_reward = np.random.normal(self.mu[arm_id], self.sigma[arm_id])
-        self.empirical_mean_per_arm[arm_id] = (self.empirical_mean_per_arm[arm_id] * self.num_acceptance_per_arm[
-            arm_id] + sampled_reward) / (self.num_acceptance_per_arm[arm_id] + 1.0)
-        self.num_acceptance_per_arm[arm_id] += 1.0
-        return True
+
+        if self.determ_pro > np.random.rand():
+            gamma = self.trust_func()
+            CB = [np.sqrt(gamma / float(max(1, self.num_acceptance_per_arm[i]))) for i in range(self.K)]
+            UCB_i = self.empirical_mean_per_arm[arm_id] + CB[arm_id]
+            # find the arm with the highest lcb
+            LCB_j = max([self.empirical_mean_per_arm[i] - CB[i] for i in range(self.K)])
+            if LCB_j > UCB_i:
+                return False
+            # no other arm j has LCB larger than UCB of arm i
+            self.num_acceptance_total += 1.0
+            self.accept_ratio = (self.K + self.num_acceptance_total) / (self.K + self.global_time)
+            # observe reward of arm i
+            sampled_reward = np.random.normal(self.mu[arm_id], self.sigma[arm_id])
+            self.empirical_mean_per_arm[arm_id] = (self.empirical_mean_per_arm[arm_id] * self.num_acceptance_per_arm[
+                arm_id] + sampled_reward) / (self.num_acceptance_per_arm[arm_id] + 1.0)
+            self.num_acceptance_per_arm[arm_id] += 1.0
+            return True
+        else:
+            if np.random.rand() > 0.5:
+                return False
+            else:
+                self.num_acceptance_total += 1.0
+                self.accept_ratio = (self.K + self.num_acceptance_total) / (self.K + self.global_time)
+                # observe reward of arm i
+                sampled_reward = np.random.normal(self.mu[arm_id], self.sigma[arm_id])
+                self.empirical_mean_per_arm[arm_id] = (self.empirical_mean_per_arm[arm_id] *
+                                                       self.num_acceptance_per_arm[
+                                                           arm_id] + sampled_reward) / (
+                                                                  self.num_acceptance_per_arm[arm_id] + 1.0)
+                self.num_acceptance_per_arm[arm_id] += 1.0
+                return True
 
     def isUserAccept2(self, arm_id):
         """
@@ -342,6 +359,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="BAIR test")
     parser.add_argument('--rho', default=1)
     parser.add_argument('--alpha', default=1)
+    parser.add_argument('--dp', default=1)
     parser.add_argument('--min_gap', default=0.5)
     parser.add_argument('--num_trials', default=1000)
     parser.add_argument('--T', default=1000)
@@ -355,6 +373,7 @@ if __name__ == '__main__':
 
     rho = float(args['rho'])
     alpha = float(args['alpha'])
+    detpro = float(args['dp'])
     min_gap = float(args['min_gap'])
     num_trials = int(args['num_trials'])
     TT = int(args['T'])
@@ -370,8 +389,8 @@ if __name__ == '__main__':
     print("alg, min_gap, delta, K", alg, min_gap, delta, K)
     for run in tqdm(range(num_trials)):
         mu = generate_mu(K=K, min_gap=min_gap)
-        # print(mu)
-        user_model = User(mu=mu, rho=rho, alpha=alpha)
+        print(detpro)
+        user_model = User(mu=mu, rho=rho, alpha=alpha, determ_pro=detpro)
         user_model.initialize()
         if alg == 'tas':
             res, t, n = run_track_and_stop(user_model, delta, MAX_ITE=max_ite)
