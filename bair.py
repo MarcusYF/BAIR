@@ -389,7 +389,6 @@ if __name__ == '__main__':
     print("alg, min_gap, delta, K", alg, min_gap, delta, K)
     for run in tqdm(range(num_trials)):
         mu = generate_mu(K=K, min_gap=min_gap)
-        print(detpro)
         user_model = User(mu=mu, rho=rho, alpha=alpha, determ_pro=detpro)
         user_model.initialize()
         if alg == 'tas':
