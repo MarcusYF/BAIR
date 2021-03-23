@@ -186,7 +186,7 @@ class User:
         self.num_acceptance_per_arm[arm_id] += 1.0
         return True
 
-def run_simulation(user_model, delta, N_1_amp=1.0, verbose=True):
+def run_simulation(user_model, delta, N_1_amp=1.0, m=1, verbose=True):
     K = len(user_model.mu)
     N_1 = 2*(K-1)/rho /delta * N_1_amp
     # N_1= 0
@@ -233,31 +233,33 @@ def run_simulation(user_model, delta, N_1_amp=1.0, verbose=True):
         print('Phase-2 starts:')
     #### phase 2 ####
     # initializationF
-    F = [i for i in range(K)]
+    # F = [i for i in range(K)]
+    # while len(F) > 1:
+    #     if verbose:
+    #         print(F)
+    #     mask = np.ones(K) * 1e8
+    #     mask[F] = 0
+    #     mask[F] += user_model.num_acceptance_per_arm[F]
+    #     i = mask.argmin()
+    #     accepted = user_model.isUserAccept(i)
+    #     if not accepted:
+    #         F.remove(i)
+    # last_arm = F.pop()
+
+    F = dict(zip(range(K), [m] * K))
     while len(F) > 1:
         if verbose:
             print(F)
-        mask = np.ones(K) * 1e8
-        mask[F] = 0
-        mask[F] += user_model.num_acceptance_per_arm[F]
-        i = mask.argmin()
-        accepted = user_model.isUserAccept(i)
-        if not accepted:
-            F.remove(i)
-        # for i in F:
-        #     accepted = user_model.isUserAccept(i)
-        #     if verbose:
-        #         print('ucb:', user_model.ucb)
-        #         print('mu:', user_model.mu)
-        #         print('lcb:', user_model.lcb)
-        #         print('gap:', user_model.ucb-user_model.lcb)
-        #         print(user_model.global_time)
-        #         print(user_model.trust_func())
-        #         print(user_model.num_acceptance_per_arm[i])
-        #
-        #     if not accepted:
-        #         F.remove(i)
-    last_arm = F.pop()
+        for i in range(K):
+            if i in F.keys():
+                accepted = user_model.isUserAccept(i)
+                if not accepted:
+                    F[i] -= 1
+                    if F[i] < 0:
+                        F.pop(i)
+
+    last_arm = list(F.keys())[0]
+
     best_arm = np.argmax(user_model.mu)
     print("best arm is {}, algorithm finds {} in {} rounds".format(best_arm, last_arm, user_model.global_time))
     return last_arm == best_arm, user_model.global_time, user_model.num_acceptance_total
@@ -383,6 +385,8 @@ if __name__ == '__main__':
     N1_amp = float(args['N1_amp'])
     max_ite = int(args['max_ite'])
 
+    m_in_phase2 = 8*detpro*(1-detpro)/((2*detpro-1)**2)*np.log(2*K/delta)
+
     res_ls = []
     T = []
     N = []
@@ -394,7 +398,7 @@ if __name__ == '__main__':
         if alg == 'tas':
             res, t, n = run_track_and_stop(user_model, delta, MAX_ITE=max_ite)
         elif alg == 'bair':
-            res, t, n = run_simulation(user_model, delta, N_1_amp=N1_amp, verbose=False)
+            res, t, n = run_simulation(user_model, delta, N_1_amp=N1_amp, m=m_in_phase2, verbose=False)
         elif alg == 'uni':
             res, t, n = uniform_explore(user_model, TT)
         elif alg == 'exp3':
