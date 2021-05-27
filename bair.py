@@ -414,4 +414,3 @@ if __name__ == '__main__':
             N.append(t - n)
         print(np.mean(T), np.mean(N) / np.mean(T) * 100, np.mean(res_ls))
 
-python - jl bair.py - -alg = bair - -min_gap = 0.5 - -delta = 0.1 - -K = 20 - -dp = 0.9 - -m = 5
