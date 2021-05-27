@@ -186,9 +186,9 @@ class User:
         self.num_acceptance_per_arm[arm_id] += 1.0
         return True
 
-def run_simulation(user_model, delta, N_1_amp=1.0, m=1, verbose=True):
+def run_simulation(user_model, delta, alpha=1.0, m=1, verbose=True):
     K = len(user_model.mu)
-    N_1 = (2*(K-1)/delta)**(1/ N_1_amp) /rho
+    N_1 = (2*(K-1)/delta)**(1/ alpha) /rho
     # N_1= 0
     if verbose:
         print('Phase-1 steps:', N_1)
@@ -402,7 +402,7 @@ if __name__ == '__main__':
         if alg == 'tas':
             res, t, n = run_track_and_stop(user_model, delta, MAX_ITE=max_ite)
         elif alg == 'bair':
-            res, t, n = run_simulation(user_model, delta, N_1_amp=N1_amp, m=m_in_phase2, verbose=False)
+            res, t, n = run_simulation(user_model, delta, alpha=alpha, m=m_in_phase2, verbose=False)
         elif alg == 'uni':
             res, t, n = uniform_explore(user_model, TT)
         elif alg == 'exp3':
@@ -414,3 +414,4 @@ if __name__ == '__main__':
             N.append(t - n)
         print(np.mean(T), np.mean(N) / np.mean(T) * 100, np.mean(res_ls))
 
+# python-jl bair.py --alg=bair --min_gap=0.5 --delta=0.1 --K=20 --alpha=0.1
