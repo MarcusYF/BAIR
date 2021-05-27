@@ -188,7 +188,7 @@ class User:
 
 def run_simulation(user_model, delta, N_1_amp=1.0, m=1, verbose=True):
     K = len(user_model.mu)
-    N_1 = (2*(K-1)/delta)**(1/self.alpha) /rho * N_1_amp
+    N_1 = (2*(K-1)/delta)**(1/ N_1_amp) /rho
     # N_1= 0
     if verbose:
         print('Phase-1 steps:', N_1)
@@ -413,3 +413,5 @@ if __name__ == '__main__':
             T.append(t)
             N.append(t - n)
         print(np.mean(T), np.mean(N) / np.mean(T) * 100, np.mean(res_ls))
+
+python - jl bair.py - -alg = bair - -min_gap = 0.5 - -delta = 0.1 - -K = 20 - -dp = 0.9 - -m = 5
