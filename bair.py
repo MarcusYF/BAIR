@@ -117,7 +117,7 @@ class User:
         trust function / numerator in CB term
         :return:
         """
-        return np.max([0, 2*np.log(self.rho()*np.power(max(self.num_acceptance_total, 1), self.alpha))])
+        return np.max([0, 2*self.alpha*np.log(  self.rho() * max( self.num_acceptance_total, 1) ) ]  )
 
     def isUserAccept(self, arm_id):
         """
@@ -188,7 +188,7 @@ class User:
 
 def run_simulation(user_model, delta, N_1_amp=1.0, m=1, verbose=True):
     K = len(user_model.mu)
-    N_1 = 2*(K-1)/rho /delta * N_1_amp
+    N_1 = (2*(K-1)/delta)**(1/self.alpha) /rho * N_1_amp
     # N_1= 0
     if verbose:
         print('Phase-1 steps:', N_1)
