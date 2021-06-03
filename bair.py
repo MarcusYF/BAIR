@@ -186,9 +186,12 @@ class User:
         self.num_acceptance_per_arm[arm_id] += 1.0
         return True
 
-def run_simulation(user_model, delta, alpha=1.0, m=1, verbose=True):
+def run_simulation(user_model, delta, alpha=1.0, m=1, N1=None, verbose=True):
     K = len(user_model.mu)
-    N_1 = (2*(K-1)/delta)**(1/ alpha) /rho
+    if N1 is None:
+        N_1 = (2*(K-1)/delta)**(1/ alpha) /rho
+    else:
+        N_1 = N1
     # N_1= 0
     if verbose:
         print('Phase-1 steps:', N_1)
@@ -371,7 +374,7 @@ if __name__ == '__main__':
     parser.add_argument('--alg', default='bair')
     parser.add_argument('--delta', default=0.1)
     parser.add_argument('--K', default=2)
-    parser.add_argument('--N1_amp', default=1)
+    parser.add_argument('--N1', default=1)
     parser.add_argument('--max_ite', default=100000)
 
     args = vars(parser.parse_args())
@@ -386,7 +389,7 @@ if __name__ == '__main__':
     alg = args['alg']
     delta = float(args['delta'])
     K = int(args['K'])
-    N1_amp = float(args['N1_amp'])
+    N1 = float(args['N1'])
     max_ite = int(args['max_ite'])
 
     m_in_phase2 = m*8*detpro*(1-detpro)/((2*detpro-1)**2)*np.log(2*K/delta)
@@ -403,7 +406,7 @@ if __name__ == '__main__':
             res, t, n = run_track_and_stop(user_model, delta, MAX_ITE=max_ite)
         elif alg == 'bair':
             print("m_in_phase2:", m_in_phase2)
-            res, t, n = run_simulation(user_model, delta, alpha=alpha, m=m_in_phase2, verbose=False)
+            res, t, n = run_simulation(user_model, delta, alpha=alpha, m=m_in_phase2, N1=N1, verbose=False)
         elif alg == 'uni':
             res, t, n = uniform_explore(user_model, TT)
         elif alg == 'exp3':
