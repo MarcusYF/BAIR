@@ -402,6 +402,7 @@ if __name__ == '__main__':
         if alg == 'tas':
             res, t, n = run_track_and_stop(user_model, delta, MAX_ITE=max_ite)
         elif alg == 'bair':
+            print("m_in_phase2:", m_in_phase2)
             res, t, n = run_simulation(user_model, delta, alpha=alpha, m=m_in_phase2, verbose=False)
         elif alg == 'uni':
             res, t, n = uniform_explore(user_model, TT)
@@ -414,4 +415,20 @@ if __name__ == '__main__':
             N.append(t - n)
         print(np.mean(T), np.mean(N) / np.mean(T) * 100, np.mean(res_ls))
 
-# python-jl bair.py --alg=bair --min_gap=0.5 --delta=0.1 --K=20 --alpha=0.1
+
+python-jl bair.py --alg=bair --min_gap=0.5 --delta=0.02 --K=2 --alpha=2
+python-jl bair.py --alg=bair --min_gap=0.5 --delta=0.02 --K=5 --alpha=2
+python-jl bair.py --alg=bair --min_gap=0.5 --delta=0.02 --K=20 --alpha=2
+python-jl bair.py --alg=bair --min_gap=0.5 --delta=0.02 --K=100 --alpha=2
+python-jl bair.py --alg=bair --min_gap=0.5 --delta=0.01 --K=2 --alpha=2
+python-jl bair.py --alg=bair --min_gap=0.5 --delta=0.01 --K=5 --alpha=2
+python-jl bair.py --alg=bair --min_gap=0.5 --delta=0.01 --K=20 --alpha=2
+python-jl bair.py --alg=bair --min_gap=0.5 --delta=0.01 --K=100 --alpha=2
+python-jl bair.py --alg=bair --min_gap=0.5 --delta=0.005 --K=2 --alpha=2
+python-jl bair.py --alg=bair --min_gap=0.5 --delta=0.005 --K=5 --alpha=2
+python-jl bair.py --alg=bair --min_gap=0.5 --delta=0.005 --K=20 --alpha=2
+python-jl bair.py --alg=bair --min_gap=0.5 --delta=0.005 --K=100 --alpha=2
+
+python-jl bair.py --alg=tas --min_gap=0.5 --delta=0.1 --K=2 --alpha=2 --max_ite=1000000
+python-jl bair.py --alg=uni --min_gap=0.5 --delta=0.1 --K=2 --alpha=2 --T=956
+python-jl bair.py --alg=exp3 --min_gap=0.5 --delta=0.1 --K=2 --alpha=2 --T=956
